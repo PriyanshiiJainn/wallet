@@ -1,11 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../src/generated/prisma"
 }
 
@@ -15,11 +9,14 @@ datasource db {
 
 model User {
   id        String   @id @default(uuid())
+  email     String?  @unique
+  name      String
   phone     String   @unique
   password  String
+  OnRampTransaction OnRampTransaction[]
+  Balance            Balance[]
   createdAt DateTime @default(now())
 }
-
 
 model Merchant {
   id        Int      @id @default(autoincrement())
@@ -38,6 +35,7 @@ model Balance {
   userId String @unique
   amount Int
   locked Int
+  user User @relation(fields: [userId], references: [id])
 }
 
 model OnRampTransaction {
@@ -45,7 +43,14 @@ model OnRampTransaction {
   token     String   @unique
   provider  String
   amount    Int
-  status    String
+  status    OnRampStatus
   startTime DateTime
   userId    String
+  user User @relation(fields: [userId], references: [id])
+}
+
+enum OnRampStatus{
+  Success
+  Failure
+  Processing
 }
